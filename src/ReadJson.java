@@ -36,7 +36,7 @@ public class ReadJson {
         String output = "abc";
         String totlaJson="";
         try {
-            URL url = new URL("https://swapi.dev/api/people/4/");
+            URL url = new URL("https://last-airbender-api.fly.dev/api/v1/characters");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setRequestProperty("Accept", "application/json");
@@ -73,20 +73,25 @@ public class ReadJson {
 
         try {
 
-            org.json.simple.JSONArray msg = (org.json.simple.JSONArray) jsonObject.get("films");
+            org.json.simple.JSONArray msg = (org.json.simple.JSONArray) jsonObject.get("allies");
             int n =   msg.size(); //(msg).length();
             for (int i = 0; i < n; ++i) {
+                String test = (String) msg.get(i);
+                System.out.println("Allies: " + test);
+                // System.out.println(person.getInt("key"));
+            }
+
+            msg = (org.json.simple.JSONArray) jsonObject.get("enemies");
+            n =   msg.size(); //(msg).length();
+            for (int i = 0; i < n; ++i) {
                 String test =(String) msg.get(i);
-                System.out.println(test);
+                System.out.println("Enemies: " + test);
                 // System.out.println(person.getInt("key"));
             }
             String name = (String)jsonObject.get("name");
-            String height = (String)jsonObject.get("height");
-            String birthYear = (String)jsonObject.get("birth_year");
-            String eyeColor = (String)jsonObject.get("eye_color");
-            String mass = (String)jsonObject.get("mass");
 
-            System.out.println(name + " has a mass of " + mass + " and was born in " + birthYear + " with " + eyeColor + " eyes.");
+            System.out.println(name);
+
         }
 
         catch (Exception e) {
