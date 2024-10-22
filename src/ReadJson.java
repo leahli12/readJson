@@ -68,35 +68,36 @@ public class ReadJson {
 
         JSONParser parser = new JSONParser();
         //System.out.println(str);
-        org.json.simple.JSONObject jsonObject = (org.json.simple.JSONObject) parser.parse(totlaJson);
-        System.out.println(jsonObject);
+        org.json.simple.JSONArray jsonArray = (org.json.simple.JSONArray) parser.parse(totlaJson);
+        for(int i = 0; i < jsonArray.size(); i++) {
+            JSONObject jsonObject = (JSONObject) jsonArray.get(i);
 
-        try {
+            try {
+                System.out.println();
+                String name = (String) jsonObject.get("name");
+                System.out.println("Name: " + name);
+                org.json.simple.JSONArray msg = (org.json.simple.JSONArray) jsonObject.get("allies");
+                int n = msg.size(); //(msg).length();
+                for (int k = 0; k < n; k++) {
+                    String test = (String) msg.get(k);
+                    System.out.println("Allies: " + test);
+                    // System.out.println(person.getInt("key"));
+                }
 
-            org.json.simple.JSONArray msg = (org.json.simple.JSONArray) jsonObject.get("allies");
-            int n =   msg.size(); //(msg).length();
-            for (int i = 0; i < n; ++i) {
-                String test = (String) msg.get(i);
-                System.out.println("Allies: " + test);
-                // System.out.println(person.getInt("key"));
+                msg = (org.json.simple.JSONArray) jsonObject.get("enemies");
+                n = msg.size(); //(msg).length();
+                for (int k = 0; k < n; k++) {
+                    String test = (String) msg.get(k);
+                    System.out.println("Enemies: " + test);
+                    // System.out.println(person.getInt("key"));
+                }
             }
-
-            msg = (org.json.simple.JSONArray) jsonObject.get("enemies");
-            n =   msg.size(); //(msg).length();
-            for (int i = 0; i < n; ++i) {
-                String test =(String) msg.get(i);
-                System.out.println("Enemies: " + test);
-                // System.out.println(person.getInt("key"));
+            catch (Exception e) {
+                e.printStackTrace();
             }
-            String name = (String)jsonObject.get("name");
-
-            System.out.println(name);
-
         }
 
-        catch (Exception e) {
-            e.printStackTrace();
-        }
+
 
 
 
