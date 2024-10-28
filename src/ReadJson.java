@@ -7,6 +7,9 @@
 //        prepareGUI();
 //    }
 
+// TODO: Item 12 is broken
+// TODO: Azula has too much beef
+
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -43,8 +46,9 @@ public class ReadJson implements ActionListener {
     public String affiliation = "";
     public String allies = "";
     public String enemies = "";
-    public int index = 0; // max 19
+    public int index = -1; // max 19
     public static String totlaJson="";
+    public String temp;
 
 
     public static void main(String args[]) throws ParseException {
@@ -159,27 +163,27 @@ public class ReadJson implements ActionListener {
 
         JButton button1 = new JButton("button 1");
         JButton button2 = new JButton("button 2");
-        JButton button3 = new JButton("button 3");
-        JButton button4 = new JButton("button 4");
-        JButton button5 = new JButton("button 5");
+//        JButton button3 = new JButton("button 3");
+//        JButton button4 = new JButton("button 4");
+//        JButton button5 = new JButton("button 5");
 
         button1.setActionCommand("button1");
         button2.setActionCommand("button2");
-        button3.setActionCommand("button3");
-        button4.setActionCommand("button4");
-        button5.setActionCommand("button5");
+//        button3.setActionCommand("button3");
+//        button4.setActionCommand("button4");
+//        button5.setActionCommand("button5");
 
         button1.addActionListener(new ButtonClickListener());
         button2.addActionListener(new ButtonClickListener());
-        button3.addActionListener(new ButtonClickListener());
-        button4.addActionListener(new ButtonClickListener());
-        button5.addActionListener(new ButtonClickListener());
+//        button3.addActionListener(new ButtonClickListener());
+//        button4.addActionListener(new ButtonClickListener());
+//        button5.addActionListener(new ButtonClickListener());
 
         mainFrame.add(button1);
         mainFrame.add(button2);
-        mainFrame.add(button3);
-        mainFrame.add(button4);
-        mainFrame.add(button5);
+//        mainFrame.add(button3);
+//        mainFrame.add(button4);
+//        mainFrame.add(button5);
 
         mainFrame.setVisible(true);
     }
@@ -195,10 +199,20 @@ public class ReadJson implements ActionListener {
                     } catch (ParseException ex) {
                         throw new RuntimeException(ex);
                     }
-                    if(enemies.equals("")){ // add affiliation case here later
-                        statusLabel.setText(name + "\n" + allies);
-                    } else {
-                        statusLabel.setText(name + "\n" + allies + "\n" + enemies);
+                    if(allies.equals("") && !enemies.equals("")){
+                        temp = "<html>" + name + "<br> No allies <br>" + enemies + "</html>";
+                        statusLabel.setText(temp);
+                    } else if(enemies.equals("") && !allies.equals("")){ // add affiliation case here later
+                        temp = "<html>" + name + "<br>" + allies + "<br>No enemies <br></html>";
+                        statusLabel.setText(temp);
+                    } else if(enemies.equals("") && allies.equals("")){
+                        temp = "<html>" + name + "<br>" + "No enemies or allies" + "</html>";
+                        statusLabel.setText(temp);
+                    }
+                    else {
+                        temp = "<html>" + name + "<br>" + allies + "<br>" + enemies + "</html>";
+                        statusLabel.setText(temp);
+//                        statusLabel.setText("<html>name + <br> + allies + <br> + enemies</html>");
                     }
                 }
 //                else if (command.equals("Submit")) {
@@ -224,6 +238,12 @@ public class ReadJson implements ActionListener {
     // statusLabel.setText("Ok Button clicked.");
 
     public void setInfo() throws ParseException {
+        if(index < 19){
+            index += 1;
+        } else {
+            index = 0;
+        }
+
         JSONParser parser = new JSONParser();
         //System.out.println(str);
         org.json.simple.JSONArray jsonArray = (org.json.simple.JSONArray) parser.parse(totlaJson);
@@ -232,23 +252,29 @@ public class ReadJson implements ActionListener {
             try {
                 String nameTemp = (String) jsonObject.get("name");
                 name = "Name: " + nameTemp;
-                System.out.println(name);
+//                System.out.println(name);
 
                 org.json.simple.JSONArray msg = (org.json.simple.JSONArray) jsonObject.get("allies");
-                String test = (String) msg.get(index);
+//                String test = (String) msg.get(0);
                 allies = "";
+                if (msg.size() != 0){ // TODO: figure out how to test if the arraylist is empty
+                    test = (String) msg.get(0);
+                    allies = "Allies: " + test;
+                    System.out.println(allies);
+                }
                 allies = "Allies: " + test;
-                System.out.println(allies);
+//                System.out.println(allies);
                 // System.out.println(person.getInt("key"));
 
                 msg = (org.json.simple.JSONArray) jsonObject.get("enemies");
                 enemies = "";
                 if (msg.size() != 0) {
-                    test = (String) msg.get(index);
+                    test = (String) msg.get(0);
                     enemies = "Enemies: " + test;
-                    System.out.println(enemies);
+//                    System.out.println(enemies);
                     // System.out.println(person.getInt("key"));
                 }
+                // Check if it's Azula and literally write one only for azula
             }
             catch (Exception e) {
                 e.printStackTrace();
