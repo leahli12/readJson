@@ -25,6 +25,29 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 
+//- Wit-Sharpening Potion
+//- Fire-Protection Potion
+//- Hair-Raising Potion
+//- Memory Potion
+//- Pepperup Potion
+//- Scintillation Solution
+//    - Powdered unicorn horn
+//    - Runespoor eggs
+//- Strengthening Solution
+//- Draught of Peace
+//- Essence of Insanity
+//- Babbling Beverage
+//- Baruffio’s Brain Elixir
+//- Befuddlement Draught
+//- Blood-Replenishing Potion
+//- Calming Draught
+//- Cheese-Based Potions
+//- Sleeping Draught
+//
+//Manual Image Adding
+//- Polyjuice Potion
+//- Felix Felicis
+
 // Program for print data in JSON format.
 public class potionsClass implements ActionListener {
 
