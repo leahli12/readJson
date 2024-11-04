@@ -44,7 +44,7 @@ import java.awt.event.WindowEvent;
 //- Cheese-Based Potions
 //- Sleeping Draught
 //
-//Manual Image Adding
+// Manual Image Adding
 //- Polyjuice Potion
 //- Felix Felicis
 
@@ -61,14 +61,10 @@ public class potionsClass implements ActionListener {
     private int WIDTH=800;
     private int HEIGHT=700;
 
+    public static String url;
     public String id = "";
     public String name = "";
-    public String affiliation = "";
-    public String allies = "";
-    public String enemies = "";
-    public int index = -1; // max 19
     public static String totlaJson="";
-    public String temp;
 
 
     public static void main(String args[]) throws ParseException {
@@ -84,7 +80,6 @@ public class potionsClass implements ActionListener {
         // To print in JSON format.
 //        System.out.print(file.get("Tuition Fees"));
 //        System.out.println(file.get("Full Name" ));
-        pull();
     }
 
     public potionsClass(){
@@ -94,14 +89,17 @@ public class potionsClass implements ActionListener {
     public static void pull() throws ParseException {
         String output = "abc";
         try {
-            URL url = new URL("https://last-airbender-api.fly.dev/api/v1/characters");
+            String urlTemp = "https://wizard-world-api.herokuapp.com/Elixirs";
+            urlTemp += url;
+            System.out.println(urlTemp);
+            URL url = new URL(urlTemp);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setRequestProperty("Accept", "application/json");
 
             if (conn.getResponseCode() != 200) {
 
-                throw new RuntimeException("Failed : HTTP error code : "
+                throw new RuntimeException("Darn! : HTTP error code : "
                         + conn.getResponseCode());
             }
 
@@ -129,7 +127,7 @@ public class potionsClass implements ActionListener {
 
     private void prepareGUI() {
         // Sets up our "canvas"
-        mainFrame = new JFrame("Leah learning Swing");
+        mainFrame = new JFrame("Potions Class");
         mainFrame.setSize(WIDTH, HEIGHT); // Use this to change size
         mainFrame.setLayout(new GridLayout(2, 1));
 
@@ -185,8 +183,8 @@ public class potionsClass implements ActionListener {
 //        JButton button4 = new JButton("button 4");
 //        JButton button5 = new JButton("button 5");
 
-        button1.setActionCommand("button2");
-        button2.setActionCommand("button1");
+        button1.setActionCommand("button1");
+        button2.setActionCommand("button2");
 //        button3.setActionCommand("button3");
 //        button4.setActionCommand("button4");
 //        button5.setActionCommand("button5");
@@ -213,7 +211,7 @@ public class potionsClass implements ActionListener {
 
             if (command.equals("button1")) { // Checking what is being broadcasted
                 try {
-                    browse(true);
+                    browse(false);
                 } catch (ParseException ex) {
                     throw new RuntimeException(ex);
                 }
@@ -221,11 +219,14 @@ public class potionsClass implements ActionListener {
 
             if (command.equals("button2")) { // Checking what is being broadcasted
                 try {
-                    browse(false);
+//                    browse(true);
+                    url = "?name=Felix";
+                    pull();
                 } catch (ParseException ex) {
                     throw new RuntimeException(ex);
                 }
             }
+
 
 //                else if (command.equals("Submit")) {
 //                    statusLabel.setText("Submit Button clicked.");
@@ -250,77 +251,19 @@ public class potionsClass implements ActionListener {
     // statusLabel.setText("Ok Button clicked.");
 
     public void browse(boolean isNext) throws ParseException {
-        if (isNext) {
-            if (index < 19) {
-                index += 1;
-            } else {
-                index = 0;
-            }
-        }
-        else {
-            if (index <= 0){
-                index = 19;
-            } else {
-                index -= 1;
-            }
-        }
-        temp = "<html>" + name + "<br>";
-        if(!affiliation.equals("")){
-            temp += affiliation + "<br>";
-        } else {
-            temp += "No affiliation <br>";
-        }
-        if(!allies.equals("")){
-            temp += allies + "<br>";
-        } else {
-            temp += "No allies <br>";
-        }
-        if(!enemies.equals("")){
-            temp += enemies + "<br>";
-        } else {
-            temp += "No enemies <br>";
-        }
-        temp += "</html>";
 
-        statusLabel.setText(temp);
+
+        statusLabel.setText("temp");
 
         JSONParser parser = new JSONParser();
         //System.out.println(str);
         org.json.simple.JSONArray jsonArray = (org.json.simple.JSONArray) parser.parse(totlaJson);
-        JSONObject jsonObject = (JSONObject) jsonArray.get(index);
+        JSONObject jsonObject = (JSONObject) jsonArray.get(0);
 
         try {
             String nameTemp = (String) jsonObject.get("name");
             name = "Name: " + nameTemp;
-//                System.out.println(name);
-
-            org.json.simple.JSONArray msg = (org.json.simple.JSONArray) jsonObject.get("allies");
-            String test = (String) msg.get(0);
-            allies = "";
-            if (msg.size() != 0){
-                test = (String) msg.get(0);
-//                    System.out.println(allies);
-                allies = "Allies: " + test;
-            }
-//                System.out.println(allies);
-            // System.out.println(person.getInt("key"));
-
-            msg = (org.json.simple.JSONArray) jsonObject.get("enemies");
-            enemies = "";
-            if (msg.size() != 0) {
-                test = (String) msg.get(0);
-                enemies = "Enemies: " + test;
-//                    System.out.println(enemies);
-                // System.out.println(person.getInt("key"));
-            }
-
-            String affTemp = (String) jsonObject.get("affiliation");
-            if(affTemp != null){
-                affiliation = "Affiliation: " + affTemp;
-            } else {
-                affiliation = "";
-            }
-
+            System.out.println(name);
         }
         catch (Exception e) {
             e.printStackTrace();
