@@ -23,6 +23,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
 
 
 //- Wit-Sharpening Potion
@@ -65,6 +66,8 @@ public class potionsClass implements ActionListener {
     public String id = "";
     public String name = "";
     public static String totlaJson="";
+    public ArrayList<String> linkStubs;
+    public int index = 0;
 
 
     public static void main(String args[]) throws ParseException {
@@ -83,6 +86,27 @@ public class potionsClass implements ActionListener {
     }
 
     public potionsClass(){
+        linkStubs = new ArrayList<>();
+        linkStubs.add("?Name=Felix");
+        linkStubs.add("?name=Wit");
+        linkStubs.add("?name=Fire-Protection");
+        linkStubs.add("?name=Hair-Raising");
+        linkStubs.add("?name=Memory");
+        linkStubs.add("?name=Pepperup");
+        linkStubs.add("?name=Scintillation");
+        linkStubs.add("?name=Strengthening");
+        linkStubs.add("?name=Draught");
+        linkStubs.add("?name=Essence");
+        linkStubs.add("?name=Babbling");
+        linkStubs.add("?name=Baruffio's");
+        linkStubs.add("?name=Befuddlement");
+        linkStubs.add("?name=Blood-Replenishing");
+        linkStubs.add("?name=Calming");
+        linkStubs.add("?name=Cheese");
+        linkStubs.add("?name=Sleeping");
+        linkStubs.add("?name=Polyjuice");
+        linkStubs.add("?name=Felix");
+
         prepareGUI();
     }
 
@@ -91,7 +115,7 @@ public class potionsClass implements ActionListener {
         try {
             String urlTemp = "https://wizard-world-api.herokuapp.com/Elixirs";
             urlTemp += url;
-            System.out.println(urlTemp);
+//            System.out.println(urlTemp);
             URL url = new URL(urlTemp);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
@@ -107,11 +131,19 @@ public class potionsClass implements ActionListener {
                     (conn.getInputStream())));
 
 
-            System.out.println("Output from Server .... \n");
+//            System.out.println("Output from Server .... \n");
             while ((output = br.readLine()) != null) {
                 System.out.println(output);
-                totlaJson += output;
+                totlaJson = output;
             }
+
+            JSONParser parser = new JSONParser();
+            org.json.simple.JSONArray jsonArray = (org.json.simple.JSONArray) parser.parse(totlaJson);
+            JSONObject jsonObject = (JSONObject) jsonArray.get(0);
+            String nameTemp = (String) jsonObject.get("name");
+            String name = "Name: " + nameTemp;
+            System.out.println(name);
+
 
             conn.disconnect();
 
@@ -220,7 +252,9 @@ public class potionsClass implements ActionListener {
             if (command.equals("button2")) { // Checking what is being broadcasted
                 try {
 //                    browse(true);
-                    url = "?name=Felix";
+                    url = linkStubs.get(index);
+//                    System.out.println(url);
+                    index++;
                     pull();
                 } catch (ParseException ex) {
                     throw new RuntimeException(ex);
