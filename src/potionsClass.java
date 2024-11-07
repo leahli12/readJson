@@ -68,6 +68,7 @@ public class potionsClass implements ActionListener {
     public static String totlaJson="";
     public ArrayList<String> linkStubs;
     public int index = 0;
+    public String optImg = "";
 
 
     public static void main(String args[]) throws ParseException {
@@ -87,7 +88,6 @@ public class potionsClass implements ActionListener {
 
     public potionsClass(){
         linkStubs = new ArrayList<>();
-        linkStubs.add("?Name=Felix");
         linkStubs.add("?name=Wit");
         linkStubs.add("?name=Fire-Protection");
         linkStubs.add("?name=Hair-Raising");
@@ -253,8 +253,8 @@ public class potionsClass implements ActionListener {
                 try {
 //                    browse(true);
                     url = linkStubs.get(index);
-//                    System.out.println(url);
                     index++;
+//                    System.out.println(url);
                     pull();
                 } catch (ParseException ex) {
                     throw new RuntimeException(ex);
@@ -302,6 +302,12 @@ public class potionsClass implements ActionListener {
         catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void identifyPotion(){
+        String tester = "";
+        // How to check if each ingredient isn't unique to a potion
+        
     }
 }
 
