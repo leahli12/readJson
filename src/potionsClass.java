@@ -68,7 +68,8 @@ public class potionsClass implements ActionListener {
     public static String totlaJson="";
     public ArrayList<String> linkStubs;
     public int index = 0;
-    public String optImg = "";
+    public String optImg = ""; // For the ones that need manual images
+    public ArrayList<String> userIngredients;
 
 
     public static void main(String args[]) throws ParseException {
@@ -87,6 +88,7 @@ public class potionsClass implements ActionListener {
     }
 
     public potionsClass(){
+        identifyPotion();
         linkStubs = new ArrayList<>();
         linkStubs.add("?name=Wit");
         linkStubs.add("?name=Fire-Protection");
@@ -100,7 +102,6 @@ public class potionsClass implements ActionListener {
         linkStubs.add("?name=Babbling");
         linkStubs.add("?name=Baruffio's");
         linkStubs.add("?name=Befuddlement");
-        linkStubs.add("?name=Blood-Replenishing");
         linkStubs.add("?name=Calming");
         linkStubs.add("?name=Cheese");
         linkStubs.add("?name=Sleeping");
@@ -305,9 +306,33 @@ public class potionsClass implements ActionListener {
     }
 
     public void identifyPotion(){
-        String tester = "";
-        // How to check if each ingredient isn't unique to a potion
-        
+        String tester = "Salamander blood, bursting mushrooms, Wartcap powder";
+        tester = tester.toLowerCase();
+        // One big if check
+        // Make an arraylist, scraping for each ingredient separated by comma (turn to lower)
+        // If the arraylist index is not -1 (not found), then that's a true statement part of the ifs
+        // If I want to generate random recipes in the future, I'd have to make an arraylist for each potion's ingredients
+        // then check against each specific arraylist which might be horrific
+        // Or just pull ingredients from the API for one of the potions? Then I'd only need to make an ArrayList for the names of the potions which it pulls from randomly
+        userIngredients = new ArrayList<>();
+        int lastIndex = 0;
+        for (int i = 0; i < tester.length() - 1; i++){
+            String ingredient = "";
+            String letter = tester.substring(i, i+1);
+            if(letter.equals(",")){
+                System.out.println(i);
+                ingredient = tester.substring(lastIndex, i);
+                lastIndex = i + 2;
+                userIngredients.add(ingredient);
+                System.out.println(userIngredients);
+            }
+            if (i == tester.length() - 2){
+                ingredient = tester.substring(lastIndex, tester.length());
+                userIngredients.add(ingredient);
+                System.out.println(userIngredients);
+            }
+            // not getting the last item rn
+        }
     }
 }
 
