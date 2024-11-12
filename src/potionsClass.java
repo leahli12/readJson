@@ -23,8 +23,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.ArrayList;
-
+import java.util.*;
 
 //- Wit-Sharpening Potion
 //- Fire-Protection Potion
@@ -69,7 +68,9 @@ public class potionsClass implements ActionListener {
     public ArrayList<String> linkStubs;
     public int index = 0;
     public String optImg = ""; // For the ones that need manual images
-    public ArrayList<String> userIngredients;
+    public ArrayList<String> potionNames;
+    public static Map<String, Set<String>> cookbook;
+    public boolean makingCookbook;
 
 
     public static void main(String args[]) throws ParseException {
@@ -77,18 +78,28 @@ public class potionsClass implements ActionListener {
         // which is a subclass of java.util.HashMap.
         potionsClass screen = new potionsClass();
         screen.showEventDemo();
-        JSONObject file = new JSONObject();
-        file.put("Full Name", "Ritu Sharma");
-        file.put("Roll No.", new Integer(1704310046));
-        file.put("Tuition Fees", new Double(65400));
-
-        // To print in JSON format.
-//        System.out.print(file.get("Tuition Fees"));
-//        System.out.println(file.get("Full Name" ));
     }
 
     public potionsClass(){
-        identifyPotion();
+        identifyPotion(); // remove/reconfigure later
+        makeCookbook();
+        potionNames = new ArrayList<>();
+        potionNames.add("Wit-Sharpening Potion");
+        potionNames.add("Fire-Protection Potion");
+        potionNames.add("Hair-Raising Potion");
+        potionNames.add("Memory Potion");
+        potionNames.add("Pepperup Potion");
+        potionNames.add("Scintillation Solution");
+        potionNames.add("Strengthening Solution");
+        potionNames.add("Draught of Peace");
+        potionNames.add("Essence of Insanity");
+        potionNames.add("Babbling Beverage");
+        potionNames.add("Baruffio's Brain Elixir");
+        potionNames.add("Befuddlement Draught");
+        potionNames.add("Calming Draught");
+        potionNames.add("Cheese-Based Potions");
+        potionNames.add("Sleeping Draught");
+        System.out.println(potionNames);
         linkStubs = new ArrayList<>();
         linkStubs.add("?name=Wit");
         linkStubs.add("?name=Fire-Protection");
@@ -138,13 +149,16 @@ public class potionsClass implements ActionListener {
                 totlaJson = output;
             }
 
-            JSONParser parser = new JSONParser();
-            org.json.simple.JSONArray jsonArray = (org.json.simple.JSONArray) parser.parse(totlaJson);
-            JSONObject jsonObject = (JSONObject) jsonArray.get(0);
-            String nameTemp = (String) jsonObject.get("name");
-            String name = "Name: " + nameTemp;
-            System.out.println(name);
+            if(!cookbook.isEmpty()) {
+                JSONParser parser = new JSONParser();
+                org.json.simple.JSONArray jsonArray = (org.json.simple.JSONArray) parser.parse(totlaJson);
+                JSONObject jsonObject = (JSONObject) jsonArray.get(0);
+                String nameTemp = (String) jsonObject.get("name");
+                String name = "Name: " + nameTemp;
+                System.out.println(name);
+            } else {
 
+            }
 
             conn.disconnect();
 
@@ -314,8 +328,26 @@ public class potionsClass implements ActionListener {
         // If I want to generate random recipes in the future, I'd have to make an arraylist for each potion's ingredients
         // then check against each specific arraylist which might be horrific
         // Or just pull ingredients from the API for one of the potions? Then I'd only need to make an ArrayList for the names of the potions which it pulls from randomly
-        userIngredients = new ArrayList<>();
+        HashSet<String> testingSet = new HashSet<>();
+                // Add some kind of function that can scrape names + ingredients of each potion as an ArrayList?
         int lastIndex = 0;
+//        for (int i = 0; i < tester.length() - 1; i++){
+//            String ingredient = "";
+//            String letter = tester.substring(i, i+1);
+//            if(letter.equals(",")){
+//                System.out.println(i);
+//                ingredient = tester.substring(lastIndex, i);
+//                lastIndex = i + 2;
+//                userIngredients.add(ingredient);
+//                System.out.println(userIngredients);
+//            }
+//            if (i == tester.length() - 2){
+//                ingredient = tester.substring(lastIndex, tester.length());
+//                userIngredients.add(ingredient);
+//                System.out.println(userIngredients);
+//            }
+//        }
+
         for (int i = 0; i < tester.length() - 1; i++){
             String ingredient = "";
             String letter = tester.substring(i, i+1);
@@ -323,15 +355,35 @@ public class potionsClass implements ActionListener {
                 System.out.println(i);
                 ingredient = tester.substring(lastIndex, i);
                 lastIndex = i + 2;
-                userIngredients.add(ingredient);
-                System.out.println(userIngredients);
+                testingSet.add(ingredient);
+                System.out.println(testingSet);
             }
             if (i == tester.length() - 2){
                 ingredient = tester.substring(lastIndex, tester.length());
-                userIngredients.add(ingredient);
-                System.out.println(userIngredients);
+                testingSet.add(ingredient);
+                System.out.println(testingSet);
             }
-            // not getting the last item rn
+        }
+
+        for(Map.Entry<String, Set<String>> entry: cookbook.entrySet()){
+            System.out.println(entry);
+                if (testingSet.containsAll(entry.getValue())) {
+                    System.out.println(entry.getKey());
+                    System.out.println("whoooo");
+                }
+            System.out.println("hi");
+        }
+    }
+
+    public void makeCookbook(){
+        cookbook = new HashMap<>();
+        HashSet<String> hmm = new HashSet<String>();
+        hmm.add("bursting mushrooms");
+        hmm.add("wartcap powder");
+        hmm.add("salamander blood");
+        cookbook.put("Felix Felicis", new HashSet<>(hmm)); // this would be potionNames.get(i)
+        for(int i = 0; i < potionNames.size(); i++){ // Iterate through potionNames
+
         }
     }
 }
