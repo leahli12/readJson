@@ -65,12 +65,14 @@ public class potionsClass implements ActionListener {
     public String id = "";
     public String name = "";
     public static String totlaJson="";
-    public ArrayList<String> linkStubs;
+    public static ArrayList<String> linkStubs;
     public int index = 0;
     public String optImg = ""; // For the ones that need manual images
     public ArrayList<String> potionNames;
-    public static Map<String, Set<String>> cookbook;
-    public boolean makingCookbook;
+    public Map<String, Set<String>> cookbook;
+    public static boolean cookbookDone;
+    public ArrayList<String> potionTemp;
+    public static int potionIndex;
 
 
     public static void main(String args[]) throws ParseException {
@@ -80,9 +82,7 @@ public class potionsClass implements ActionListener {
         screen.showEventDemo();
     }
 
-    public potionsClass(){
-        identifyPotion(); // remove/reconfigure later
-        makeCookbook();
+    public potionsClass() throws ParseException {
         potionNames = new ArrayList<>();
         potionNames.add("Wit-Sharpening Potion");
         potionNames.add("Fire-Protection Potion");
@@ -119,6 +119,9 @@ public class potionsClass implements ActionListener {
         linkStubs.add("?name=Polyjuice");
         linkStubs.add("?name=Felix");
 
+        makeCookbook();
+        identifyPotion(); // remove/reconfigure later
+
         prepareGUI();
     }
 
@@ -126,8 +129,14 @@ public class potionsClass implements ActionListener {
         String output = "abc";
         try {
             String urlTemp = "https://wizard-world-api.herokuapp.com/Elixirs";
-            urlTemp += url;
+            if(cookbookDone) {
+                urlTemp += url;
+            }
 //            System.out.println(urlTemp);
+            else {
+                url = linkStubs.get(potionIndex);
+                urlTemp += url;
+            }
             URL url = new URL(urlTemp);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
@@ -149,7 +158,7 @@ public class potionsClass implements ActionListener {
                 totlaJson = output;
             }
 
-            if(!cookbook.isEmpty()) {
+            if(cookbookDone) {
                 JSONParser parser = new JSONParser();
                 org.json.simple.JSONArray jsonArray = (org.json.simple.JSONArray) parser.parse(totlaJson);
                 JSONObject jsonObject = (JSONObject) jsonArray.get(0);
@@ -157,9 +166,13 @@ public class potionsClass implements ActionListener {
                 String name = "Name: " + nameTemp;
                 System.out.println(name);
             } else {
-
+                JSONParser parser = new JSONParser();
+                org.json.simple.JSONArray jsonArray = (org.json.simple.JSONArray) parser.parse(totlaJson);
+                JSONObject jsonObject = (JSONObject) jsonArray.get(0);
+                String nameTemp = (String) jsonObject.get("name");
+                String name = "Name: " + nameTemp;
+                System.out.println(name);
             }
-
             conn.disconnect();
 
         } catch (MalformedURLException e) {
@@ -375,16 +388,17 @@ public class potionsClass implements ActionListener {
         }
     }
 
-    public void makeCookbook(){
+    public void makeCookbook() throws ParseException {
         cookbook = new HashMap<>();
         HashSet<String> hmm = new HashSet<String>();
         hmm.add("bursting mushrooms");
         hmm.add("wartcap powder");
         hmm.add("salamander blood");
         cookbook.put("Felix Felicis", new HashSet<>(hmm)); // this would be potionNames.get(i)
-        for(int i = 0; i < potionNames.size(); i++){ // Iterate through potionNames
-
+        for(potionIndex = 0; potionIndex < potionNames.size(); potionIndex++){ // Iterate through potionNames
+            pull();
         }
+//        cookbookDone = true; uncomment when the thing is actually done
     }
 }
 
