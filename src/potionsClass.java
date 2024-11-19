@@ -58,6 +58,7 @@ public class potionsClass implements ActionListener {
     private JMenu file, edit, help;
     private JMenuItem cut, copy, paste, selectAll;
     private JTextArea ta; //typing area
+    public String taInput;
     private int WIDTH=800;
     private int HEIGHT=700;
 
@@ -70,9 +71,9 @@ public class potionsClass implements ActionListener {
     public String optImg = ""; // For the ones that need manual images
     public ArrayList<String> potionNames;
     public Map<String, Set<String>> cookbook;
-    public static boolean cookbookDone;
     public ArrayList<String> potionTemp;
     public static int potionIndex;
+    public static HashSet<String> tempSet;
 
 
     public static void main(String args[]) throws ParseException {
@@ -120,7 +121,7 @@ public class potionsClass implements ActionListener {
         linkStubs.add("?name=Felix");
 
         makeCookbook();
-        identifyPotion(); // remove/reconfigure later
+//        identifyPotion(); // remove/reconfigure later
 
         prepareGUI();
     }
@@ -129,14 +130,10 @@ public class potionsClass implements ActionListener {
         String output = "abc";
         try {
             String urlTemp = "https://wizard-world-api.herokuapp.com/Elixirs";
-            if(cookbookDone) {
-                urlTemp += url;
-            }
+
 //            System.out.println(urlTemp);
-            else {
-                url = linkStubs.get(potionIndex);
-                urlTemp += url;
-            }
+            url = linkStubs.get(potionIndex);
+            urlTemp += url;
             URL url = new URL(urlTemp);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
@@ -154,25 +151,24 @@ public class potionsClass implements ActionListener {
 
 //            System.out.println("Output from Server .... \n");
             while ((output = br.readLine()) != null) {
-                System.out.println(output);
+//                System.out.println(output);
                 totlaJson = output;
             }
 
-            if(cookbookDone) {
                 JSONParser parser = new JSONParser();
                 org.json.simple.JSONArray jsonArray = (org.json.simple.JSONArray) parser.parse(totlaJson);
-                JSONObject jsonObject = (JSONObject) jsonArray.get(0);
+                JSONObject jsonObject = (JSONObject) jsonArray.get(potionIndex);
                 String nameTemp = (String) jsonObject.get("name");
                 String name = "Name: " + nameTemp;
-                System.out.println(name);
-            } else {
-                JSONParser parser = new JSONParser();
-                org.json.simple.JSONArray jsonArray = (org.json.simple.JSONArray) parser.parse(totlaJson);
-                JSONObject jsonObject = (JSONObject) jsonArray.get(0);
-                String nameTemp = (String) jsonObject.get("name");
-                String name = "Name: " + nameTemp;
-                System.out.println(name);
-            }
+                System.out.println(jsonObject.get("ingredients").getClass());
+                org.json.simple.JSONArray ingArray = (org.json.simple.JSONArray) jsonObject.get("ingredients");
+                for(int i = 0; i < ingArray.size(); i++) {
+                    JSONObject allInfo = (JSONObject) (ingArray.get(i));
+                    String ingName = (String) (allInfo.get("name"));
+                    System.out.println(ingName);
+                    tempSet.add(ingName);
+                }
+
             conn.disconnect();
 
         } catch (MalformedURLException e) {
@@ -189,7 +185,7 @@ public class potionsClass implements ActionListener {
         // Sets up our "canvas"
         mainFrame = new JFrame("Potions Class");
         mainFrame.setSize(WIDTH, HEIGHT); // Use this to change size
-        mainFrame.setLayout(new GridLayout(2, 1));
+        mainFrame.setLayout(new GridLayout(3, 1));
 
         //menu at top
         cut = new JMenuItem("cut");
@@ -201,24 +197,10 @@ public class potionsClass implements ActionListener {
         paste.addActionListener(this);
         selectAll.addActionListener(this);
 
-//            mb = new JMenuBar();
-//            file = new JMenu("File");
-//            edit = new JMenu("Edit");
-//            help = new JMenu("Help");
-//            edit.add(cut);
-//            edit.add(copy);
-//            edit.add(paste);
-//            edit.add(selectAll);
-//            mb.add(file);
-//            mb.add(edit);
-//            mb.add(help);
-        //end menu at top
 
-        ta = new JTextArea();
-        ta.setBounds(50, 5, WIDTH-100, HEIGHT-50);
-//            mainFrame.add(mb);  //add menu bar
-//            mainFrame.add(ta);//add typing area
-//            mainFrame.setJMenuBar(mb); //set menu bar
+        ta = new JTextArea("Ingredients");
+        ta.setLineWrap(true);
+        ta.setFont(new Font("Times", Font.PLAIN, 14));
 
         statusLabel = new JLabel("", JLabel.CENTER);
         statusLabel.setSize(350, 100);
@@ -229,7 +211,8 @@ public class potionsClass implements ActionListener {
             }
         });
         controlPanel = new JPanel();
-        controlPanel.setLayout(new GridLayout(1, 2)); //set the layout of the panel
+        controlPanel.setLayout(new GridLayout(2, 1)); //set the layout of the panel
+        mainFrame.add(ta);
         mainFrame.add(statusLabel);
         mainFrame.add(controlPanel);
 //            mainFrame.setVisible(true);
@@ -237,8 +220,8 @@ public class potionsClass implements ActionListener {
 
     private void showEventDemo() {
 
-        JButton button1 = new JButton("<-- Previous");
-        JButton button2 = new JButton("Next -->");
+        JButton button1 = new JButton("Generate Random");
+        JButton button2 = new JButton("Brew!");
 //        JButton button3 = new JButton("button 3");
 //        JButton button4 = new JButton("button 4");
 //        JButton button5 = new JButton("button 5");
@@ -278,15 +261,17 @@ public class potionsClass implements ActionListener {
             }
 
             if (command.equals("button2")) { // Checking what is being broadcasted
-                try {
+
 //                    browse(true);
-                    url = linkStubs.get(index);
-                    index++;
-//                    System.out.println(url);
+                url = linkStubs.get(index);
+                taInput = ta.getText();
+//                    System.out.println(url)
+                try {
                     pull();
                 } catch (ParseException ex) {
                     throw new RuntimeException(ex);
                 }
+                identifyPotion();
             }
 
 
@@ -324,8 +309,8 @@ public class potionsClass implements ActionListener {
 
         try {
             String nameTemp = (String) jsonObject.get("name");
-            name = "Name: " + nameTemp;
-            System.out.println(name);
+//            name = "Name: " + nameTemp;
+//            System.out.println(name);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -333,8 +318,7 @@ public class potionsClass implements ActionListener {
     }
 
     public void identifyPotion(){
-        String tester = "Salamander blood, bursting mushrooms, Wartcap powder";
-        tester = tester.toLowerCase();
+        taInput = taInput.toLowerCase();
         // One big if check
         // Make an arraylist, scraping for each ingredient separated by comma (turn to lower)
         // If the arraylist index is not -1 (not found), then that's a true statement part of the ifs
@@ -361,18 +345,18 @@ public class potionsClass implements ActionListener {
 //            }
 //        }
 
-        for (int i = 0; i < tester.length() - 1; i++){
+        for (int i = 0; i < taInput.length() - 1; i++){
             String ingredient = "";
-            String letter = tester.substring(i, i+1);
+            String letter = taInput.substring(i, i+1);
             if(letter.equals(",")){
-                System.out.println(i);
-                ingredient = tester.substring(lastIndex, i);
+//                System.out.println(i);
+                ingredient = taInput.substring(lastIndex, i);
                 lastIndex = i + 2;
                 testingSet.add(ingredient);
                 System.out.println(testingSet);
             }
-            if (i == tester.length() - 2){
-                ingredient = tester.substring(lastIndex, tester.length());
+            if (i == taInput.length() - 2){
+                ingredient = taInput.substring(lastIndex, taInput.length());
                 testingSet.add(ingredient);
                 System.out.println(testingSet);
             }
@@ -382,23 +366,24 @@ public class potionsClass implements ActionListener {
             System.out.println(entry);
                 if (testingSet.containsAll(entry.getValue())) {
                     System.out.println(entry.getKey());
-                    System.out.println("whoooo");
+                    System.out.println("match!");
                 }
-            System.out.println("hi");
-        }
+         }
     }
 
     public void makeCookbook() throws ParseException {
         cookbook = new HashMap<>();
-        HashSet<String> hmm = new HashSet<String>();
-        hmm.add("bursting mushrooms");
-        hmm.add("wartcap powder");
-        hmm.add("salamander blood");
-        cookbook.put("Felix Felicis", new HashSet<>(hmm)); // this would be potionNames.get(i)
-        for(potionIndex = 0; potionIndex < potionNames.size(); potionIndex++){ // Iterate through potionNames
+        tempSet = new HashSet<>();
+//        cookbook.put("Felix Felicis", new HashSet<>(tempSet)); // this would be potionNames.get(i)
+        for(potionIndex = 0; potionIndex < potionNames.size(); potionIndex++) { // Iterate through potionNames
+            tempSet.clear();
             pull();
+            cookbook.put(potionNames.get(potionIndex), tempSet);
+            System.out.println(potionIndex);
+            System.out.println("cookbook:");
+            System.out.println(cookbook);
         }
-//        cookbookDone = true; uncomment when the thing is actually done
+        System.out.println("done!");
     }
 }
 
