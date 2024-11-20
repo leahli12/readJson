@@ -74,6 +74,7 @@ public class potionsClass implements ActionListener {
     public ArrayList<String> potionTemp;
     public static int potionIndex;
     public static HashSet<String> tempSet;
+    public static boolean cookbookDone;
 
 
     public static void main(String args[]) throws ParseException {
@@ -84,13 +85,13 @@ public class potionsClass implements ActionListener {
     }
 
     public potionsClass() throws ParseException {
+        cookbookDone = false;
         potionNames = new ArrayList<>();
         potionNames.add("Wit-Sharpening Potion");
         potionNames.add("Fire-Protection Potion");
         potionNames.add("Hair-Raising Potion");
         potionNames.add("Memory Potion");
         potionNames.add("Pepperup Potion");
-        potionNames.add("Scintillation Solution");
         potionNames.add("Strengthening Solution");
         potionNames.add("Draught of Peace");
         potionNames.add("Essence of Insanity");
@@ -100,14 +101,12 @@ public class potionsClass implements ActionListener {
         potionNames.add("Calming Draught");
         potionNames.add("Cheese-Based Potions");
         potionNames.add("Sleeping Draught");
-        System.out.println(potionNames);
         linkStubs = new ArrayList<>();
         linkStubs.add("?name=Wit");
         linkStubs.add("?name=Fire-Protection");
         linkStubs.add("?name=Hair-Raising");
         linkStubs.add("?name=Memory");
         linkStubs.add("?name=Pepperup");
-        linkStubs.add("?name=Scintillation");
         linkStubs.add("?name=Strengthening");
         linkStubs.add("?name=Draught");
         linkStubs.add("?name=Essence");
@@ -117,8 +116,6 @@ public class potionsClass implements ActionListener {
         linkStubs.add("?name=Calming");
         linkStubs.add("?name=Cheese");
         linkStubs.add("?name=Sleeping");
-        linkStubs.add("?name=Polyjuice");
-        linkStubs.add("?name=Felix");
 
         makeCookbook();
 //        identifyPotion(); // remove/reconfigure later
@@ -130,8 +127,6 @@ public class potionsClass implements ActionListener {
         String output = "abc";
         try {
             String urlTemp = "https://wizard-world-api.herokuapp.com/Elixirs";
-
-//            System.out.println(urlTemp);
             url = linkStubs.get(potionIndex);
             urlTemp += url;
             URL url = new URL(urlTemp);
@@ -149,26 +144,22 @@ public class potionsClass implements ActionListener {
                     (conn.getInputStream())));
 
 
-//            System.out.println("Output from Server .... \n");
             while ((output = br.readLine()) != null) {
-//                System.out.println(output);
                 totlaJson = output;
             }
-
+            if(!cookbookDone) {
                 JSONParser parser = new JSONParser();
                 org.json.simple.JSONArray jsonArray = (org.json.simple.JSONArray) parser.parse(totlaJson);
-                JSONObject jsonObject = (JSONObject) jsonArray.get(potionIndex);
+                JSONObject jsonObject = (JSONObject) jsonArray.get(0);
                 String nameTemp = (String) jsonObject.get("name");
                 String name = "Name: " + nameTemp;
-                System.out.println(jsonObject.get("ingredients").getClass());
                 org.json.simple.JSONArray ingArray = (org.json.simple.JSONArray) jsonObject.get("ingredients");
-                for(int i = 0; i < ingArray.size(); i++) {
+                for (int i = 0; i < ingArray.size(); i++) {
                     JSONObject allInfo = (JSONObject) (ingArray.get(i));
                     String ingName = (String) (allInfo.get("name"));
-                    System.out.println(ingName);
-                    tempSet.add(ingName);
+                    tempSet.add(ingName.toLowerCase());
                 }
-
+            }
             conn.disconnect();
 
         } catch (MalformedURLException e) {
@@ -266,11 +257,11 @@ public class potionsClass implements ActionListener {
                 url = linkStubs.get(index);
                 taInput = ta.getText();
 //                    System.out.println(url)
-                try {
-                    pull();
-                } catch (ParseException ex) {
-                    throw new RuntimeException(ex);
-                }
+//                try {
+//                  pull();
+//                } catch (ParseException ex) {
+//                    throw new RuntimeException(ex);
+//                }
                 identifyPotion();
             }
 
@@ -303,14 +294,11 @@ public class potionsClass implements ActionListener {
         statusLabel.setText("temp");
 
         JSONParser parser = new JSONParser();
-        //System.out.println(str);
         org.json.simple.JSONArray jsonArray = (org.json.simple.JSONArray) parser.parse(totlaJson);
         JSONObject jsonObject = (JSONObject) jsonArray.get(0);
 
         try {
             String nameTemp = (String) jsonObject.get("name");
-//            name = "Name: " + nameTemp;
-//            System.out.println(name);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -328,62 +316,42 @@ public class potionsClass implements ActionListener {
         HashSet<String> testingSet = new HashSet<>();
                 // Add some kind of function that can scrape names + ingredients of each potion as an ArrayList?
         int lastIndex = 0;
-//        for (int i = 0; i < tester.length() - 1; i++){
-//            String ingredient = "";
-//            String letter = tester.substring(i, i+1);
-//            if(letter.equals(",")){
-//                System.out.println(i);
-//                ingredient = tester.substring(lastIndex, i);
-//                lastIndex = i + 2;
-//                userIngredients.add(ingredient);
-//                System.out.println(userIngredients);
-//            }
-//            if (i == tester.length() - 2){
-//                ingredient = tester.substring(lastIndex, tester.length());
-//                userIngredients.add(ingredient);
-//                System.out.println(userIngredients);
-//            }
-//        }
-
         for (int i = 0; i < taInput.length() - 1; i++){
             String ingredient = "";
             String letter = taInput.substring(i, i+1);
             if(letter.equals(",")){
-//                System.out.println(i);
                 ingredient = taInput.substring(lastIndex, i);
                 lastIndex = i + 2;
                 testingSet.add(ingredient);
-                System.out.println(testingSet);
             }
             if (i == taInput.length() - 2){
                 ingredient = taInput.substring(lastIndex, taInput.length());
                 testingSet.add(ingredient);
-                System.out.println(testingSet);
             }
         }
+        System.out.println(testingSet);
 
         for(Map.Entry<String, Set<String>> entry: cookbook.entrySet()){
-            System.out.println(entry);
                 if (testingSet.containsAll(entry.getValue())) {
-                    System.out.println(entry.getKey());
-                    System.out.println("match!");
+                    statusLabel.setText("Congratulations! You created " + entry.getKey());
+                    break;
+                } else {
+                    statusLabel.setText("Your potion blew up!");
                 }
          }
     }
 
     public void makeCookbook() throws ParseException {
         cookbook = new HashMap<>();
-        tempSet = new HashSet<>();
 //        cookbook.put("Felix Felicis", new HashSet<>(tempSet)); // this would be potionNames.get(i)
         for(potionIndex = 0; potionIndex < potionNames.size(); potionIndex++) { // Iterate through potionNames
-            tempSet.clear();
+            tempSet = new HashSet<>(); // creates new identity
             pull();
             cookbook.put(potionNames.get(potionIndex), tempSet);
-            System.out.println(potionIndex);
-            System.out.println("cookbook:");
-            System.out.println(cookbook);
         }
-        System.out.println("done!");
+        System.out.println("final cookbook:");
+        System.out.println(cookbook);
+        cookbookDone = true;
     }
 }
 
