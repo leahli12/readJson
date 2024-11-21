@@ -10,13 +10,17 @@
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -25,35 +29,15 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.*;
 
-//- Wit-Sharpening Potion
-//- Fire-Protection Potion
-//- Hair-Raising Potion
-//- Memory Potion
-//- Pepperup Potion
-//- Scintillation Solution
-//    - Powdered unicorn horn
-//    - Runespoor eggs
-//- Strengthening Solution
-//- Draught of Peace
-//- Essence of Insanity
-//- Babbling Beverage
-//- Baruffio’s Brain Elixir
-//- Befuddlement Draught
-//- Blood-Replenishing Potion
-//- Calming Draught
-//- Cheese-Based Potions
-//- Sleeping Draught
-//
-// Manual Image Adding
-//- Polyjuice Potion
-//- Felix Felicis
-
 // Program for print data in JSON format.
 public class potionsClass implements ActionListener {
 
     private JFrame mainFrame;
     private JLabel statusLabel;
+    private JLabel imageLabel;
+    private JPanel imagePanel;
     private JPanel controlPanel;
+    private JPanel potionPanel;
     private JMenuBar mb;
     private JMenu file, edit, help;
     private JMenuItem cut, copy, paste, selectAll;
@@ -62,11 +46,12 @@ public class potionsClass implements ActionListener {
     private int WIDTH=800;
     private int HEIGHT=700;
 
-    public static String url;
+    public static String urlStub;
     public String id = "";
     public String name = "";
     public static String totlaJson="";
     public static ArrayList<String> linkStubs;
+    public static ArrayList<String> imageStubs;
     public int index = 0;
     public String optImg = ""; // For the ones that need manual images
     public ArrayList<String> potionNames;
@@ -75,6 +60,7 @@ public class potionsClass implements ActionListener {
     public static int potionIndex;
     public static HashSet<String> tempSet;
     public static boolean cookbookDone;
+    public static String imageLink;
 
 
     public static void main(String args[]) throws ParseException {
@@ -101,6 +87,7 @@ public class potionsClass implements ActionListener {
         potionNames.add("Calming Draught");
         potionNames.add("Cheese-Based Potions");
         potionNames.add("Sleeping Draught");
+
         linkStubs = new ArrayList<>();
         linkStubs.add("?name=Wit");
         linkStubs.add("?name=Fire-Protection");
@@ -117,6 +104,22 @@ public class potionsClass implements ActionListener {
         linkStubs.add("?name=Cheese");
         linkStubs.add("?name=Sleeping");
 
+        imageStubs = new ArrayList<>();
+        imageStubs.add("wit-sharpening-potion");
+        imageStubs.add("fire-protection-potion");
+        imageStubs.add("hair-raising-potion");
+        imageStubs.add("memory-potion");
+        imageStubs.add("pepperup-potion");
+        imageStubs.add("strengthening-solution");
+        imageStubs.add("draught-of-peace");
+        imageStubs.add("essence-of-insanity");
+        imageStubs.add("babbling-beverage");
+        imageStubs.add("baruffio-s-brain-elixir");
+        imageStubs.add("befuddlement-draught");
+        imageStubs.add("calming-draught");
+        imageStubs.add("cheese-based-potions");
+        imageStubs.add("sleeping-draught");
+
         makeCookbook();
 //        identifyPotion(); // remove/reconfigure later
 
@@ -127,8 +130,8 @@ public class potionsClass implements ActionListener {
         String output = "abc";
         try {
             String urlTemp = "https://wizard-world-api.herokuapp.com/Elixirs";
-            url = linkStubs.get(potionIndex);
-            urlTemp += url;
+            urlStub = linkStubs.get(potionIndex);
+            urlTemp += urlStub;
             URL url = new URL(urlTemp);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
@@ -159,6 +162,39 @@ public class potionsClass implements ActionListener {
                     String ingName = (String) (allInfo.get("name"));
                     tempSet.add(ingName.toLowerCase());
                 }
+            } else {
+                urlTemp = "https://api.potterdb.com/v1/potions/";
+                urlStub = imageStubs.get(potionIndex);
+                urlTemp += urlStub;
+                url = new URL(urlTemp);
+                conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setRequestProperty("Accept", "application/json");
+
+                if (conn.getResponseCode() != 200) {
+
+                    throw new RuntimeException("Darn! : HTTP error code : "
+                            + conn.getResponseCode());
+                }
+
+                br = new BufferedReader(new InputStreamReader(
+                        (conn.getInputStream())));
+
+
+                while ((output = br.readLine()) != null) {
+                    totlaJson = output;
+                }
+
+                JSONParser parser = new JSONParser();
+                System.out.println(totlaJson.getClass());
+//                org.json.simple.JSONArray jsonArray = (org.json.simple.JSONArray) parser.parse(totlaJson);
+                JSONObject jsonObject = (JSONObject) parser.parse(totlaJson);
+                jsonObject = (JSONObject) jsonObject.get("data");
+                jsonObject = (JSONObject) jsonObject.get("attributes");
+                System.out.println(jsonObject);
+                imageLink = (String) jsonObject.get("image");
+                System.out.println(imageLink);
+
             }
             conn.disconnect();
 
@@ -176,7 +212,7 @@ public class potionsClass implements ActionListener {
         // Sets up our "canvas"
         mainFrame = new JFrame("Potions Class");
         mainFrame.setSize(WIDTH, HEIGHT); // Use this to change size
-        mainFrame.setLayout(new GridLayout(3, 1));
+        mainFrame.setLayout(new GridLayout(4, 1));
 
         //menu at top
         cut = new JMenuItem("cut");
@@ -196,6 +232,9 @@ public class potionsClass implements ActionListener {
         statusLabel = new JLabel("", JLabel.CENTER);
         statusLabel.setSize(350, 100);
 
+        imageLabel = new JLabel();
+        imageLabel.setSize(200, 200);
+
         mainFrame.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent windowEvent) {
                 System.exit(0);
@@ -203,8 +242,16 @@ public class potionsClass implements ActionListener {
         });
         controlPanel = new JPanel();
         controlPanel.setLayout(new GridLayout(2, 1)); //set the layout of the panel
+        imagePanel = new JPanel();
+        imagePanel.setLayout(new GridLayout(1, 1));
+        potionPanel = new JPanel();
+        potionPanel.setLayout(new GridLayout(1, 2));
+
         mainFrame.add(ta);
-        mainFrame.add(statusLabel);
+        potionPanel.add(statusLabel);
+        imagePanel.add(imageLabel);
+        potionPanel.add(imagePanel);
+        mainFrame.add(potionPanel);
         mainFrame.add(controlPanel);
 //            mainFrame.setVisible(true);
     }
@@ -254,7 +301,7 @@ public class potionsClass implements ActionListener {
             if (command.equals("button2")) { // Checking what is being broadcasted
 
 //                    browse(true);
-                url = linkStubs.get(index);
+                urlStub = linkStubs.get(index);
                 taInput = ta.getText();
 //                    System.out.println(url)
 //                try {
@@ -262,7 +309,16 @@ public class potionsClass implements ActionListener {
 //                } catch (ParseException ex) {
 //                    throw new RuntimeException(ex);
 //                }
-                identifyPotion();
+                try {
+                    identifyPotion();
+                    pull();
+                    imagePanel.removeAll();
+                    addImage();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                } catch (ParseException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
 
 
@@ -305,7 +361,7 @@ public class potionsClass implements ActionListener {
         }
     }
 
-    public void identifyPotion(){
+    public void identifyPotion() throws IOException {
         taInput = taInput.toLowerCase();
         // One big if check
         // Make an arraylist, scraping for each ingredient separated by comma (turn to lower)
@@ -333,10 +389,15 @@ public class potionsClass implements ActionListener {
 
         for(Map.Entry<String, Set<String>> entry: cookbook.entrySet()){
                 if (testingSet.containsAll(entry.getValue())) {
+                    String tempName = entry.getKey();
+                    // write characteristics
                     statusLabel.setText("Congratulations! You created " + entry.getKey());
+                    potionIndex = potionNames.indexOf(tempName);
                     break;
                 } else {
                     statusLabel.setText("Your potion blew up!");
+                    imagePanel.removeAll();
+                    addImage();
                 }
          }
     }
@@ -352,6 +413,65 @@ public class potionsClass implements ActionListener {
         System.out.println("final cookbook:");
         System.out.println(cookbook);
         cookbookDone = true;
+    }
+
+    private void addImage() throws IOException {
+        try {
+            String path = "";
+
+            if (statusLabel.getText().contains("blew")) { // if it exploded
+                path = "https://i.pinimg.com/474x/88/a4/41/88a441db125792c6d982c0a955b79d5c.jpg";
+            } else {
+
+                path = imageLink;
+                if (path.contains("https")) {
+                    path = path.substring(path.indexOf("http"));
+                    System.out.println(path);
+                }
+            }
+
+
+            URL url = new URL(path);
+            BufferedImage ErrorImage = ImageIO.read(new File("Error.jpg"));
+            BufferedImage inputImageBuff = ImageIO.read(url.openStream());
+
+
+            ImageIcon inputImage;
+            if (inputImageBuff != null) {
+                inputImage = new ImageIcon(inputImageBuff.getScaledInstance(160, 150, Image.SCALE_SMOOTH));
+                // = new JLabel();
+                if (inputImage != null) {
+                    imageLabel = new JLabel(inputImage);
+                } else {
+                    imageLabel =new JLabel(new ImageIcon(ErrorImage.getScaledInstance(160, 150, Image.SCALE_SMOOTH)));
+                }
+                imagePanel.removeAll();
+                imagePanel.repaint();
+
+                imagePanel.add(imageLabel);
+                potionPanel.add(imagePanel);
+
+
+            }
+            else{
+                imageLabel =new JLabel(new ImageIcon(ErrorImage.getScaledInstance(160, 150, Image.SCALE_SMOOTH)));
+
+            }
+
+        } catch (IOException e) {
+            System.out.println(e);
+            System.out.println("sadness");
+            BufferedImage ErrorImage = ImageIO.read(new File("Error.jpg"));
+            JLabel imageLabel = new JLabel(new ImageIcon(ErrorImage.getScaledInstance(160, 150, Image.SCALE_SMOOTH)));
+
+            imagePanel.removeAll();
+            imagePanel.repaint();
+            imagePanel.add(imageLabel);
+            potionPanel.add(imagePanel);
+
+        }
+
+        mainFrame.setVisible(true);
     }
 }
 
