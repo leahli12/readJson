@@ -56,11 +56,13 @@ public class potionsClass implements ActionListener {
     public String optImg = ""; // For the ones that need manual images
     public ArrayList<String> potionNames;
     public Map<String, Set<String>> cookbook;
-    public ArrayList<String> potionTemp;
     public static int potionIndex;
     public static HashSet<String> tempSet;
     public static boolean cookbookDone;
     public static String imageLink;
+    public static String potionInfo;
+    public static ArrayList<String> characteristics;
+    public static ArrayList<String> effects;
 
 
     public static void main(String args[]) throws ParseException {
@@ -120,6 +122,8 @@ public class potionsClass implements ActionListener {
         imageStubs.add("cheese-based-potions");
         imageStubs.add("sleeping-draught");
 
+        characteristics = new ArrayList<>();
+        effects = new ArrayList<>();
         makeCookbook();
 //        identifyPotion(); // remove/reconfigure later
 
@@ -154,14 +158,17 @@ public class potionsClass implements ActionListener {
                 JSONParser parser = new JSONParser();
                 org.json.simple.JSONArray jsonArray = (org.json.simple.JSONArray) parser.parse(totlaJson);
                 JSONObject jsonObject = (JSONObject) jsonArray.get(0);
-                String nameTemp = (String) jsonObject.get("name");
-                String name = "Name: " + nameTemp;
                 org.json.simple.JSONArray ingArray = (org.json.simple.JSONArray) jsonObject.get("ingredients");
                 for (int i = 0; i < ingArray.size(); i++) {
                     JSONObject allInfo = (JSONObject) (ingArray.get(i));
                     String ingName = (String) (allInfo.get("name"));
                     tempSet.add(ingName.toLowerCase());
                 }
+                String details = (String) jsonObject.get("characteristics");
+                characteristics.add(details);
+                details = (String) jsonObject.get("effect");
+                effects.add(details);
+
             } else {
                 urlTemp = "https://api.potterdb.com/v1/potions/";
                 urlStub = imageStubs.get(potionIndex);
@@ -186,14 +193,11 @@ public class potionsClass implements ActionListener {
                 }
 
                 JSONParser parser = new JSONParser();
-                System.out.println(totlaJson.getClass());
 //                org.json.simple.JSONArray jsonArray = (org.json.simple.JSONArray) parser.parse(totlaJson);
                 JSONObject jsonObject = (JSONObject) parser.parse(totlaJson);
                 jsonObject = (JSONObject) jsonObject.get("data");
                 jsonObject = (JSONObject) jsonObject.get("attributes");
-                System.out.println(jsonObject);
                 imageLink = (String) jsonObject.get("image");
-                System.out.println(imageLink);
 
             }
             conn.disconnect();
@@ -212,7 +216,7 @@ public class potionsClass implements ActionListener {
         // Sets up our "canvas"
         mainFrame = new JFrame("Potions Class");
         mainFrame.setSize(WIDTH, HEIGHT); // Use this to change size
-        mainFrame.setLayout(new GridLayout(4, 1));
+        mainFrame.setLayout(new GridLayout(3, 1));
 
         //menu at top
         cut = new JMenuItem("cut");
@@ -291,11 +295,19 @@ public class potionsClass implements ActionListener {
             String command = e.getActionCommand();
 
             if (command.equals("button1")) { // Checking what is being broadcasted
-                try {
-                    browse(false);
-                } catch (ParseException ex) {
-                    throw new RuntimeException(ex);
+                int random = (int) (Math.random() * 14);
+                String randomPotion = potionNames.get(random);
+                ArrayList<String> ingredients = new ArrayList<String>(cookbook.get(randomPotion));
+                String ingString = "";
+                for(int i = 0; i < ingredients.size(); i++){
+                    if (i == ingredients.size() - 1){
+                        ingString += ingredients.get(i);
+                    } else {
+                        ingString += ingredients.get(i);
+                        ingString += ", ";
+                    }
                 }
+                ta.setText(ingString);
             }
 
             if (command.equals("button2")) { // Checking what is being broadcasted
@@ -303,7 +315,6 @@ public class potionsClass implements ActionListener {
 //                    browse(true);
                 urlStub = linkStubs.get(index);
                 taInput = ta.getText();
-//                    System.out.println(url)
 //                try {
 //                  pull();
 //                } catch (ParseException ex) {
@@ -340,9 +351,7 @@ public class potionsClass implements ActionListener {
             ta.copy();
         if (e.getSource() == selectAll)
             ta.selectAll();
-//        statusLabel.setText(test);
     }
-    // statusLabel.setText("Ok Button clicked.");
 
     public void browse(boolean isNext) throws ParseException {
 
@@ -385,14 +394,18 @@ public class potionsClass implements ActionListener {
                 testingSet.add(ingredient);
             }
         }
-        System.out.println(testingSet);
 
         for(Map.Entry<String, Set<String>> entry: cookbook.entrySet()){
                 if (testingSet.containsAll(entry.getValue())) {
                     String tempName = entry.getKey();
-                    // write characteristics
-                    statusLabel.setText("Congratulations! You created " + entry.getKey());
                     potionIndex = potionNames.indexOf(tempName);
+                    // write characteristics
+                    potionInfo = "<html><body>Congratulations! You created ";
+                    potionInfo += tempName;
+                    potionInfo += "<br>Appearance: " + characteristics.get(potionIndex);
+                    potionInfo += "<br>Effect: " + effects.get(potionIndex);
+                    potionInfo += "</body></html>";
+                    statusLabel.setText(potionInfo);
                     break;
                 } else {
                     statusLabel.setText("Your potion blew up!");
@@ -410,8 +423,6 @@ public class potionsClass implements ActionListener {
             pull();
             cookbook.put(potionNames.get(potionIndex), tempSet);
         }
-        System.out.println("final cookbook:");
-        System.out.println(cookbook);
         cookbookDone = true;
     }
 
@@ -426,7 +437,6 @@ public class potionsClass implements ActionListener {
                 path = imageLink;
                 if (path.contains("https")) {
                     path = path.substring(path.indexOf("http"));
-                    System.out.println(path);
                 }
             }
 
